@@ -2,17 +2,33 @@ library(igraph)
 library(socmod)
 
 make_cooperation_model <- function(grid_height = 11, grid_width = 11, 
-                                   coop_benefit = 1.0, coop_cost = 0.25) {
-  
-  g <- make_lattice(dimvector = c(grid_height, grid_width), periodic = FALSE)
+                                   coop_benefit = 1.0, coop_cost = 0.25,
+                                   disaster_cost = 0.0) {
+  # Set up spatial grid
+  g <- make_lattice(
+    dimvector = c(grid_height, grid_width), periodic = FALSE
+  )
+  # Define payoff matrix: row 1 is for focal cooperator, row 2 focal defector
+  payoff_matrix <- matrix(
+    c(coop_benefit - coop_cost,  -1.0 * coop_cost, 
+      coop_benefit,              -1.0 * disaster_cost),
+    nrow = 2,
+    byrow = TRUE,
+    dimnames = list(
+      "Focal" = c("Cooperate", "Defect"),
+      "Partner" = c("Cooperate", "Defect")
+    )
+  )
   
   # Initialized like Smaldino _MSB_ Ch. 6
   abm <- 
-    make_abm(learning_strategy = normal_game_strategy, 
-             graph = g, 
-             coop_benefit = coop_benefit, 
-             coop_cost = coop_cost) %>% 
-    
+    make_abm(
+      graph = g, 
+      coop_benefit = coop_benefit, 
+      coop_cost = coop_cost,
+      payoff_matrix = payoff_matrix,
+      learning_strategy = normal_game_strategy
+    ) %>% 
     initialize_agents(initial_prevalence = 0.5,
                       adaptive_behavior = "Cooperate",
                       legacy_behavior = "Defect")
@@ -23,33 +39,46 @@ make_cooperation_model <- function(grid_height = 11, grid_width = 11,
 
 # Two individuals play game with one another; b = coop_benefit, c = coop_cost
 play_game <- function(focal_agent, partner_agent, model) {
-  # Default payoff: if both defect, this payoff_to_focal remains unchanged
-  payoff_to_focal <- 0.0
-  if (focal_agent$get_behavior() == "Cooperate") {
-    # Both cooperate
-    if (partner_agent$get_behavior() == "Cooperate") {
-      return (model$coop_benefit - model$coop_cost)
-    # Focal agent is betrayed
-    } else {
-      return (-1.0 * model$coop_cost)
-    }
-  } else {
-    # Focal agent defects, gets cooperative benefit
-    if (partner_agent$get_behavior() == "Cooperate") {
-      payoff_to_focal <-  model$coop_benefit
-    } 
-  }
+  return (
+    model$payoff_matrix[
+      focal_agent$behavior_current,
+      partner_agent$behavior_current
+    ]
+  )
 }
+#   # Default payoff: if both defect, this payoff_to_focal remains unchanged
+#   payoff_to_focal <- 0.0
+#   
+#   if (focal_agent$get_behavior() == "Cooperate") {
+#     # Both cooperate
+#     if (partner_agent$get_behavior() == "Cooperate") {
+#       payoff_to_focal <- model$coop_benefit - model$coop_cost
+#     # Focal agent is betrayed
+#     } else {
+#       payoff_to_focal <- -1.0 * model$coop_cost
+#     }
+#   } else {
+#     # Focal agent defects, gets cooperative benefit
+#     if (partner_agent$get_behavior() == "Cooperate") {
+#       payoff_to_focal <-  model$coop_benefit
+#     } 
+#   }
+#   
+#   return (payoff_to_focal)
+# }
 
+# Have the focal_agent play the coordination game with all neighbors
 play_game_with_neighbors <- function(focal_agent, model) {
-  
   # Focal agent plays game with neighbors, accumulating payoffs
   total_payoff <- 
     sum(unlist(
-      focal_agent$get_neighbors()$map(\(n) play_game(focal_agent, n, model))
+      # Use the Neighbors$map function to play with all neighbors
+      focal_agent$get_neighbors()$map(
+        \(n) play_game(focal_agent, n, model)
+      )
     ))
-  
-  focal_agent$set_next_fitness(total_payoff)
+  # Focal agent's fitness gets set to the total_payoff
+  focal_agent$fitness_current <- total_payoff
 }
 
 
@@ -66,11 +95,11 @@ coop_model_step <- function(abm) {
   purrr::walk(
     abm$agents,
     \(agent) {
-      # print(agent$get_id())
-      # print(purrr::map_vec(agent$get_neighbors()$agents, \(a) a$get_id()))
+      # For this application we need to manually check if 
       neighbors <- agent$get_neighbors()
       tot_neighbor_fitnesses <- 
         sum(unlist(neighbors$map(\(n) n$get_fitness())))
+      # If all neighbors fitnesses are zero
       if (tot_neighbor_fitnesses == 0.0) {
         teacher <- neighbors$sample()
       } else {
@@ -91,7 +120,7 @@ coop_model_step <- function(abm) {
 # For this normal game in this format we don't have individual partner selection 
 # and interaction steps. Instead all is handled in the model_step, 
 # i.e., coop_model_step defined below
-normal_game_strategy <- make_learning_strategy(
+coop_game_strategy <- make_learning_strategy(
   partner_selection = \(f, m) NULL,
   interaction = \(f, p, m) NULL,
   model_step = coop_model_step,
