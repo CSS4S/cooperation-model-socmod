@@ -46,7 +46,11 @@ It is costly to cooperate with groundwater pumping limits from the point of view
 
 Under success-biased learning, culture can be said to *evolve*. A behavior is like a phenotype, and knowledge of or capacity for a behavior is like genes or alleles that encode a phenotype. Fitness in either case is the benefit received from the phenotype expression.
 
-To study how the prevalence of cooperation varies over time and as $t \to \infty$, we assume each agent does one of two behaviors: *Cooperate* or *Defect*. In our approach here and in many cases, it is unnecessary to represent knowledge of *how* to cooperate itself, including the acquisition of this knowledge. In other words, doing a behavior implies having already learned how to do it. This strategic abstraction is called the *phentypic gambit*, with "gambit" really meaning something more like "assumption".
+To study how the prevalence of cooperation varies over time and as $t \to \infty$, we assume each agent does one of two behaviors: *Cooperate* or *Defect*. In our approach here and in many cases, it is unnecessary to represent knowledge of *how* to cooperate itself, including the acquisition of this knowledge. In other words, doing a behavior implies having already learned how to do it. This strategic abstraction is called the *phenotypic gambit*, with "gambit" really meaning something more like "assumption".
+
+### Inspiration behind this article
+
+One of the goals of this article is to demonstrate `socmod` use by analyzing a game theory model of cooperation between agents on a spatial grid. The other goal is to motivate the study with a real-world sustainability problem, groundwater conservation. The model and analysis is inspired by Ch. 6 in Paul Smaldino's book _Modeling Social Behavior_, including some of the exercises below that Paul includes in his analysis: Paul's model is written in NetLogo, with analysis and visualizations done in R, it appears. See Paul's book for how alternative assumptions enable the formal, mathematical analysis of cooperation prevalence in different spatial contexts with migration, as opposed to simulated/generative as done here.
 
 ## Model
 
@@ -117,15 +121,28 @@ coop_game_strategy <- make_learning_strategy(
 
 ### Computational experiments
 
+To analyze 
 
-
-#### When does migration undermine cooperation?
-
-#### When can long-range ties support cooperation?
-
-- Use random rewiring with rewire probability, $r$, of the original lattice.
+```{r}
+trials <- 
+      run_trials(
+        cooperation_abm_gen, 
+        n_trials_per_param = n_trials_per_param, 
+        grid_height = L, 
+        grid_width = L, 
+        coop_benefit = 1.0, 
+        coop_cost = coop_costs, 
+        disaster_cost = 0.0, 
+        stop = stop_step, 
+        .progress = TRUE, 
+        syncfile = "costs-experiment.RData", 
+        overwrite = overwrite
+      )
+```
 
 ## Analysis
+
+
 
 ## Discussion
 
@@ -137,7 +154,17 @@ coop_game_strategy <- make_learning_strategy(
 
 ## Exercises
 
-### Exercise 1: Disastrous defection
+### Exercise 1: When does migration break cooperation?
+
+In this problem we want to understand the effect of migration on cooperation prevalence. Implement "migration" as follows:
+
+1. Add another model parameter: `migration_rate`.
+1. Every agent might migrate. You could iterate through each agent and see `if (runif() < migration_rate)`. A more efficient option might be to use, e.g., `n_migrating <- round((migration_rate * N) / 2.0)`, which can then be used to obtain `migrating_agents_idxs <- sample(1:N, n_migrating)` on each time step, then select a partner for each selected agent from the set of all agents not already set to migrate, which can be found using `setdiff(1:N, migrating_agent_idxs)`.
+1. Set `behavior_current` for each to be that of the other, i.e., exchange `behavior_current`. This can be best done after the `iterate_learning_model` call at the end of the `coop_model_step` definition in `R/model.R`.
+
+If all goes well you should get a figure that looks like Figure 6.6 in Ch. 6 of Smaldino's (2023) _Modeling Social Behavior_ [@Smaldino2023_Ch6Cooperation].
+
+### Exercise 2: Disastrous defection
 
 How do you think adding a defection disaster penalty, $\delta > 0$, will affect the prevalence of cooperation in simulations? Develop a computational experiment to investigate how cooperation prevalence is affected for different values of $\delta > 0$. Hint: use `run_trials`, specifying, e.g., `disaster_debit = c(0.1, 0.25, 0.5, 0.75, 1.0, 1.5, 2.0)`, then summarise over `disaster_debit` in `summarise_dynamics` or `summarise_outcomes` and plot, e.g., the mean prevalence at time $t=200$, or whatever is appropriate. 
 
@@ -146,7 +173,7 @@ great must $\delta$
 be in order to maintain no-migration cooperation levels for a given migration frequency?
 
 
-### Exercise 2: The shape of cooperation
+### Exercise 3: The shape of cooperation
 
 A.  Create a new computational experiment with this model where you hold $N$ constant but vary the aspect ratio of the grid. For example, if we use 1024 agents we can have a square grid, aspect ratio 1, if we use $W=H=32$ where $W$ is width and $H$ is height. We can generate several other aspect ratios, as shown in the screenshot below.
 B.  This spatial grid has hard boundaries, i.e., agents at the edge have only three neighbors, and the four corner agents have only two neighbors. What effect would you hypothesize if we made our grid into a *tourus* which is essentially the 2D surface of a donut so there are no corners or edges. This can be specified using by setting `periodic = TRUE` in `igraph::make_lattice` when you specify the ABM graph.
@@ -154,11 +181,11 @@ B.  This spatial grid has hard boundaries, i.e., agents at the edge have only th
 ![](images/clipboard-2227213626.png){width="350"}
 
 
-### Exercise 3: Reciprocity
+### Exercise 4: Reciprocity
 
 Reciprocity can increase selection pressure towards cooperation, whereby agents can adapt their behavior with different partners depending on their cooperation history over several rounds of interactions [@Nowak2006]. In other words, an agent will cooperate with those who have cooperated with them in past interactions, but defect against those who have defected agains them. There are many ways this could be implemented. The most famous is called _tit-for-tat_, which is the strategy where an agent will initially cooperate with a stranger, but if a partner defects against a focal agent, that focal agent will forever defect when partnered with the defecting partner. Implement tit-for-tat as a factor in agent behavior selection strategy, either in place of or in addition to social learning.
 
-### Exercise 4: Interconnected communities
+### Exercise 5: Interconnected communities
 
 There could be cooperation or defection between communities as well as within communities. In this exercise, create two or more independent grids, then connect the grids probabilistically. For example, you might set a `between_grid_connect_prob` that an edge exists between any two agents/nodes from different grids. How does cooperation change with different numbers and sizes of grids, and between-grid connection probability?
 

@@ -7,15 +7,24 @@ cooperation_abm_gen <- function(params) {
   return (
     make_cooperation_model(
       params$grid_height, params$grid_width, params$coop_benefit, 
-      params$coop_cost, params$disaster_cost
+      params$coop_cost, params$disaster_debit, params$migration_rate
     )
   )
 }
 
+# For this normal game in this format we don't have individual partner selection 
+# and interaction steps. Instead all is handled in the model_step, 
+# i.e., coop_model_step defined below
+coop_game_strategy <- make_learning_strategy(
+  partner_selection = \(f, m) NULL,
+  interaction = \(f, p, m) NULL,
+  model_step = coop_model_step,
+  label = "Normal game strategy"
+)
 
 make_cooperation_model <- function(grid_height = 11, grid_width = 11, 
                                    coop_benefit = 1.0, coop_cost = 0.25,
-                                   disaster_cost = 0.0) {
+                                   disaster_debit = 0.0, migration_rate = 0.0) {
   # Set up spatial grid
   g <- make_lattice(
     dimvector = c(grid_height, grid_width), periodic = FALSE
@@ -23,7 +32,7 @@ make_cooperation_model <- function(grid_height = 11, grid_width = 11,
   # Define payoff matrix: row 1 is for focal cooperator, row 2 focal defector
   payoff_matrix <- matrix(
     c(coop_benefit - coop_cost,  -1.0 * coop_cost, 
-      coop_benefit,              -1.0 * disaster_cost),
+      coop_benefit,              -1.0 * disaster_debit),
     nrow = 2,
     byrow = TRUE,
     dimnames = list(
@@ -38,6 +47,8 @@ make_cooperation_model <- function(grid_height = 11, grid_width = 11,
       coop_benefit = coop_benefit, 
       coop_cost = coop_cost,
       payoff_matrix = payoff_matrix,
+      migration_rate = migration_rate,
+      disaster_debit = disaster_debit,
       learning_strategy = coop_game_strategy
     ) %>% 
     initialize_agents(initial_prevalence = 0.5,
@@ -96,13 +107,14 @@ coop_model_step <- function(abm) {
       neighbors <- agent$get_neighbors()
       
       # Calculate unscaled weights
-      weights <- purrr::map_vec(unname(neighbors$agents), \(n) n$fitness_current)
-      # cat("weights:\n", weights, "\n")
+      weights <- purrr::map_vec(
+        unname(neighbors$agents), \(n) n$fitness_current
+      )
+      
       max_idx <- which.max(weights)
-      # cat("max_idx:\n", max_idx, "\n")
       
       teacher <- neighbors$agents[[max_idx]]
-      # Only use teacher's behavior if they have a higher
+      # Only use teacher's behavior if they have a higher fitness
       if (teacher$fitness_current > agent$fitness_current) {
         agent$set_next_behavior(teacher$behavior_current)
       }
@@ -114,15 +126,52 @@ coop_model_step <- function(abm) {
   
   # Use socmod-provided model step function for learning given next_behavior/fitness
   iterate_learning_model(abm)
+  mu <- abm$get_parameter("migration_rate")
+  if (!is.null(mu) && (mu > 0.0)) {
+    migration(abm)
+  }
 }
 
 
-# For this normal game in this format we don't have individual partner selection 
-# and interaction steps. Instead all is handled in the model_step, 
-# i.e., coop_model_step defined below
-coop_game_strategy <- make_learning_strategy(
-  partner_selection = \(f, m) NULL,
-  interaction = \(f, p, m) NULL,
-  model_step = coop_model_step,
-  label = "Normal game strategy"
-)
+# Assumes that there are an even number of agents migrating
+# and that they don't care where they migrate to as long 
+# as they migrate.
+migration <- function(abm) {
+  # First get half of migrators in group called migrators_1
+  # First see how many half of the total migrators size is
+  N <- abm$get_parameter("n_agents") 
+  mu <- abm$get_parameter("migration_rate")
+  half_migrators_size <- round(0.5 * N * mu)
+
+  # Then randomly select that number of agents to migrate
+  all_ids <- 1:N
+  migrators_ids_1 <- sample(all_ids, half_migrators_size)
+  not_migrated <- setdiff(all_ids, migrators_ids_1)
+  migrators_ids_2 <- sample(not_migrated, half_migrators_size)
+  
+  walk2(
+    migrators_ids_1, migrators_ids_2, 
+    \(mid1, mid2) {
+      # print(
+      #   paste("::: Exchanging agents with ids", mid1, "and", mid2, ":::")
+      # )
+      a1 <- abm$agents[[mid1]]
+      a2 <- abm$agents[[mid2]]
+      # Only have to exchange behaviors since the fitness is zero for all agents
+      # following the model step...
+      # ...first copy a1's behaviors before overwriting
+      a1_behavior_current_sync <- a1$behavior_current
+      a1_behavior_next_sync <- a1$get_next_behavior()
+      # ...then overwrite a1's behavior with a2's
+      a1$behavior_current <- a2$behavior_current
+      a1$set_next_behavior(a2$get_next_behavior())
+      # ...and assign a2's behaviors to be those stored from a1.
+      a2$behavior_current <- a1_behavior_current_sync
+      a2$set_next_behavior(a1_behavior_next_sync)
+    }
+  )
+}
+# Check migration is working OK
+abm <- make_cooperation_model(migration_rate = 0.01)
+migration(abm)
+

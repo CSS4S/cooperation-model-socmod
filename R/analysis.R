@@ -8,7 +8,7 @@ library(latex2exp)
 source("R/model.R")
 
 plot_costs_prevalences <- function(trials = NULL, coop_costs = c(0.235, 0.265), 
-                                   L = 21, step_final = 50, overwrite = T) {
+                                   L = 21, stop_step = 50, overwrite = T) {
   
   if (is.null(trials)) {
     trials <- 
@@ -19,8 +19,8 @@ plot_costs_prevalences <- function(trials = NULL, coop_costs = c(0.235, 0.265),
         grid_width = L, 
         coop_benefit = 1.0, 
         coop_cost = coop_costs, 
-        disaster_cost = 0.0, 
-        stop = step_final, 
+        disaster_debit = 0.0, 
+        stop = stop_step, 
         .progress = TRUE, 
         syncfile = "three-trials-two-costs.RData", 
         overwrite = overwrite
@@ -69,7 +69,7 @@ costs_outcomes_visualization <- function(trials = NULL, stop_step = 40,
         grid_width = 21, 
         coop_benefit = 1.0, 
         coop_cost = coop_costs, 
-        disaster_cost = 0.0, 
+        disaster_debit = 0.0, 
         stop = stop_step, 
         .progress = TRUE, 
         syncfile = "costs-experiment.RData", 
@@ -93,12 +93,106 @@ costs_outcomes_visualization <- function(trials = NULL, stop_step = 40,
   
   
 }
+
+plot_migration_prevalence <- function(trials = NULL, stop_step = 40,
+                                      coop_cost = 0.2,
+                                      migration_rates = c(0.0, 0.025, 0.05, 0.075, 0.1),
+                                      n_trials_per_param = 3,
+                                      L = 21,
+                                      overwrite = F) {
+  if (is.null(trials)) {
+    trials <- 
+      run_trials(
+        cooperation_abm_gen, 
+        n_trials_per_param = n_trials_per_param, 
+        grid_height = L, 
+        grid_width = L, 
+        coop_benefit = 1.0, 
+        coop_cost = coop_cost, 
+        migration_rate = migration_rates,
+        disaster_debit = 0.0, 
+        stop = stop_step, 
+        .progress = TRUE, 
+        syncfile = "migration-prevalence-dynamics.RData", 
+        overwrite = overwrite
+      )
+  }
+
+  prevalence_summary <- 
+    summarise_prevalence(
+      trials, 
+      input_parameters = "migration_rate",
+      tracked_behaviors = c("Cooperate"),
+      across_trials = FALSE
+    ) %>%
+    dplyr::mutate(
+      migration_rate = factor(migration_rate, unique(migration_rates))
+    )
+
+   p <- 
+    ggplot(
+      prevalence_summary,
+      aes(x=Step, y=Prevalence,
+          color=migration_rate,
+          linetype=migration_rate,
+          group = trial_id)
+    ) +
+    geom_line(linewidth=1.4, alpha = 0.875) + 
+    guides(linetype=guide_legend(title=TeX("Migration rate, $\\mu$"))) +
+    scale_color_manual(values = unname(SOCMOD_PALETTE), 
+                       name = TeX("Migration rate, $\\mu$")) +
+    ylab("Cooperator prevalence") +
+    theme_classic(base_size = 16)
+
+  return (p)
+
+}
   
-costs_migration_visualization <- function() {}
+migration_outcomes_summary <- function(trials = NULL, stop_step = 40,
+                                       coop_cost = 0.2,
+                                       migration_rates = c(0.0, 0.025, 0.05, 0.075, 0.1),
+                                       n_trials_per_param = 3,
+                                       L = 21,
+                                       overwrite = F) {
+  trials <- 
+    run_trials(
+      cooperation_abm_gen, 
+      n_trials_per_param = n_trials_per_param, 
+      grid_height = L, 
+      grid_width = L, 
+      coop_benefit = 1.0, 
+      coop_cost = coop_cost,
+      migration_rate = migration_rates,
+      disaster_debit = 0.0, 
+      stop = stop_step, 
+      .progress = TRUE, 
+      syncfile = "migration-experiment.RData", 
+      overwrite = overwrite
+    )
+  
+  return (
+    summarise_prevalence(
+      trials, 
+      input_parameters = "migration_rate",
+      tracked_behaviors = c("Cooperate"),
+      across_trials = FALSE
+    ) %>%
+      mutate(
+        migration_rate = factor(migration_rate, unique(migration_rates))
+      ) %>%
+      group_by(trial_id) %>%
+      filter(Step == max(Step))
+  )
+  
+  return (trials)
+}
 
 
-prevalence_summary_final_step_tbl <- function(trials = NULL, stop_step = 40,
+
+
+coopcost_summary_final_step_tbl <- function(trials = NULL, stop_step = 40,
                                           coop_costs = seq(0.175, 0.325, 0.05),
+                                          migration_rate = 0.0,
                                           n_trials_per_param = 5,
                                           L = 21,
                                           overwrite = F) {
@@ -110,8 +204,9 @@ prevalence_summary_final_step_tbl <- function(trials = NULL, stop_step = 40,
         grid_height = L, 
         grid_width = L, 
         coop_benefit = 1.0, 
-        coop_cost = coop_costs, 
-        disaster_cost = 0.0, 
+        coop_cost = coop_costs,
+        migration_rate = 0.0,
+        disaster_debit = 0.0, 
         stop = stop_step, 
         .progress = TRUE, 
         syncfile = "costs-experiment.RData", 
@@ -135,12 +230,12 @@ prevalence_summary_final_step_tbl <- function(trials = NULL, stop_step = 40,
 }
 
 
-plot_final_step_prevalence <- function(tbl_final_step) {
+plot_final_step_prevalence <- function(tbl_final_step, base_size = 12) {
   
   final_tstep <- tbl_final_step$Step[1]
-  # tbl_final_step <- group_by(tbl_final_step, coop_cost)
+  
   p <- ggplot(tbl_final_step, aes(x = as.numeric(coop_cost), y = Prevalence)) +
-    geom_jitter(size = 2, width = 0.02, alpha = 0.7, color = "dodgerblue") +
+    geom_jitter(size = 2, width = 0.04, alpha = 0.7, color = "dodgerblue") +
     stat_summary(fun = mean, geom = "line", color = "dodgerblue", size = 1.2) +
     scale_x_continuous(
       breaks = seq_along(levels(tbl_final_step$coop_cost)),
@@ -148,5 +243,5 @@ plot_final_step_prevalence <- function(tbl_final_step) {
     ) +
     xlab("Cooperation cost") +
     ylab(paste0("Cooperator prevalence at t = ", final_tstep)) +
-    theme_classic()
+    theme_classic(base_size = base_size)
 }
