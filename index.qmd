@@ -26,13 +26,13 @@ format:
 
 ## Introduction
 
-Equitable access to clean potable water depends on cooperation among those sharing groundwater aquifers, consistent with Sustainable Development Goals [10](https://sdgs.un.org/goals/goal10) and [6](https://sdgs.un.org/goals/goal6). In California's Central Valley, farms, orchards, dairies, and other agricultural industries use disproportionately more water than the communities where farm workers live in an increasingly precarious state. Wells increasingly run dry when they aren't contaminated by deadly chemicals first. The state-level water restriction enforcement agency has recently rejected several plans proposed by local water district planners. All this currently occurs against a backdrop of climate variability and political instability that increasingly drives the migration of farmers and farm workers alike.
+In California's Central Valley, farms, orchards, dairies, and other agricultural industries use disproportionately more water than the communities where farm workers live in an increasingly precarious state. Wells increasingly run dry when they aren't contaminated by deadly chemicals first. The state-level water restriction enforcement agency has recently rejected several plans proposed by local water district planners. All this currently occurs against a backdrop of climate variability and political instability that increasingly drives the migration of farmers and farm workers alike. This problem is increasingly accute across diverse societies and aquifers, though in some cases groundwater is being restored to previously overdrawn aquifers [@Jasechko2024].
 
-Theoretically, we know that high rates of migration can disrupt the formation of cooperative communities in idealized models of the establishment and diffusion of cooperation to effectively form collectives. We develop a spatial agent-based model of cooperation where agents represent water consumers arranged on a spatial grid. Migration is represented as a random switch of two agents in the grid.
+Equitable access to clean potable water depends on cooperation among those sharing groundwater aquifers, consistent with the UN Sustainable Development Goals (SDGs) [to Reduce Inequalities (SDG 10)](https://sdgs.un.org/goals/goal10) and [to provide Clean Water and Sanitation (SDG 6)](https://sdgs.un.org/goals/goal6), representing [Group I and Group B goals](https://css4s.github.io/abm-notes/intro.html#course-outline-in-the-context-of-sustainable-development) to, in general, support *infrastructure*/*institutions* and *basic human needs*, respectively. Cooperation to sustain groundwater resources is increasingly important since there are more frequent climate change-driven droughts threatening human and non-human life on land. This project, then, also addresses Group E (*environmental and ecological protection*) Sustainable Development Goals, namely to accelerate relevant [Climate Action (SDG 13)](https://sdgs.un.org/goals/goal13), and to protect the literal bedrock of ecosystems that support all [Life on Land (SDG 15)](https://sdgs.un.org/goals/goal15).
 
-We analyze how migration can break up cooperatives, i.e., blocks of cooperating agents who assort to effectively block out those who intend to defect. We characterize the effect of migration rate for a range of costs of cooperation.
+Theoretically, we know that high rates of migration can disrupt the formation of cooperative communities in idealized models of the establishment and diffusion of cooperation to effectively form collectives. However, many theoretical questions remain and existing results have not yet been interpreted for how they could support sustainability in any way, including groundwater sustainability. We therefore develop here a spatial agent-based model of cooperation where agents represent water consumers arranged on a spatial grid. Migration is represented as a random switch of two agents in the grid. *Cooperation* or its opposite, *defection*, result in different payoffs depending on which of these two behaviors interaction partners choose. Cooperation can be mutually beneficial, but it comes at the cost of an initial investment that will be uncompensated if a model interaction partner defects. If both individuals defect, i.e., choose to not cooperate, then they may face a *disaster debit*, i.e., a penalty that could represent, e.g., ecological collapse, external sanctions, or some other form of penalty.
 
-This analysis perhaps suggests that supporting facilitation to connect cooperative individuals when they are forced to move could be an effective countermeasure to the deleterious effects of unguided migration we study here.
+We analyze how migration can break up cooperatives, i.e., blocks of cooperating agents who assort to effectively block out those who intend to defect. We characterize the effect of migration rate for a range of costs of cooperation. This basic analysis lays the groundwork for designing interventions that help maintain cooperation even with frequent migration (see [Exercise 3](#sec-exercise-3-delta-for-cooperation-maintenance)).
 
 ![Sources. Map: Becker, Rachel (Aug. 18, 2021). "California enacted a groundwater law 7 years ago. But wells are still drying up — and the threat is spreading". Cal Matters. https://calmatters.org/environment/2021/08/california-groundwater-dry. See [Contaminated water references](#sec-valley-water-references) below for information on towns marked as persistently reliant on bottled water.](images/clipboard-3111589071.png)
 
@@ -44,10 +44,9 @@ It is costly to cooperate with groundwater pumping limits from the point of view
 
 ### Cultural evolutionary game theory
 
-Under success-biased learning, culture can be said to _evolve_. A behavior is like a phenotype, and knowledge of or capacity for a behavior is like genes or alleles that encode a phenotype. Fitness in either case is the benefit received from the phenotype expression.
+Under success-biased learning, culture can be said to *evolve*. A behavior is like a phenotype, and knowledge of or capacity for a behavior is like genes or alleles that encode a phenotype. Fitness in either case is the benefit received from the phenotype expression.
 
-To study how the prevalence of cooperation varies over time and as $t \to \infty$, we assume each agent does one of two behaviors: _Cooperate_ or _Defect_. In our approach here and in many cases, it is unnecessary to represent knowledge of _how_ to cooperate itself, including the acquisition of this knowledge. In other words, doing a behavior implies having already learned how to do it. This strategic abstraction is called the _phentypic gambit_, with "gambit" really meaning something more like "assumption".
-
+To study how the prevalence of cooperation varies over time and as $t \to \infty$, we assume each agent does one of two behaviors: *Cooperate* or *Defect*. In our approach here and in many cases, it is unnecessary to represent knowledge of *how* to cooperate itself, including the acquisition of this knowledge. In other words, doing a behavior implies having already learned how to do it. This strategic abstraction is called the *phentypic gambit*, with "gambit" really meaning something more like "assumption".
 
 ## Model
 
@@ -55,9 +54,9 @@ The model is implemented in `model.R`. I show code snippets from that file to il
 
 ### Spatial structure
 
-Spatial structure, we hypothesize, provides the substrate for cooperation to take hold since neighbors can form spatially organized _cooperatives_, i.e., clusters of contiguous, connected cooperators. We represent spatial structure by locating agent nodes in a two-dimensional lattice graph we set to be square with side length $L$, so the agent population size is $N = L^2$. The model grid can be rectangular in general, and it is left as an exercise to the reader to test what happens when $N$ is held constant but the aspect ratio of the grid is varied, i.e., the width divided by the height. 
+Spatial structure, we hypothesize, provides the substrate for cooperation to take hold since neighbors can form spatially organized *cooperatives*, i.e., clusters of contiguous, connected cooperators. We represent spatial structure by locating agent nodes in a two-dimensional lattice graph we set to be square with side length $L$, so the agent population size is $N = L^2$. The model grid can be rectangular in general, and it is left as an exercise to the reader to test what happens when $N$ is held constant but the aspect ratio of the grid is varied, i.e., the width divided by the height.
 
-### Social interaction and payoffs
+### Social interaction and payoffs {#sec-social-interaction-and-payoffs}
 
 Agents interact with all of their neighbors on each time step, collecting payoffs according to whether an agent and each neighbor is currently doing the "Cooperate" or "Defect" behavior, or equivalently whether each agent is a cooperator or defector.
 
@@ -77,7 +76,7 @@ play_game_with_neighbors <- function(focal_agent, model) {
 }
 ```
 
-They receive payoffs resulting from `play_game`, which are given in @tbl-payoff-matrix in terms of the benefit to cooperation, $\beta$, the cost of cooperation, $\gamma$, and the disaster payoff $-\delta$, where $\beta,\gamma,\delta \in [0, \infty)$. For our initial study here we will set $\delta = 0$, leaving an examination of how cooperation prevalence is affected for different values of $\delta > 0$ as an exercise.
+They receive payoffs resulting from `play_game`, which are given in @tbl-payoff-matrix in terms of the benefit to cooperation, $\beta$, the cost of cooperation, $\gamma$, and the disaster debit $-\delta$, where $\beta,\gamma,\delta \in [0, \infty)$. For our initial study here we will set $\delta = 0$, leaving an examination of how cooperation prevalence is affected for different values of $\delta > 0$ as an exercise.
 
 |                          | $b_j = \text{Cooperate}$ | $b_j = \text{Defect}$ |
 |------------------------|------------------------|------------------------|
@@ -116,7 +115,15 @@ coop_game_strategy <- make_learning_strategy(
 )
 ```
 
-### Computational experiment
+### Computational experiments
+
+
+
+#### When does migration undermine cooperation?
+
+#### When can long-range ties support cooperation?
+
+- Use random rewiring with rewire probability, $r$, of the original lattice.
 
 ## Analysis
 
@@ -124,17 +131,62 @@ coop_game_strategy <- make_learning_strategy(
 
 -   Promote adaptive mitigation: possible to focus groundwater recharge on the areas with the most amenable geological qualities for replenishing the groundwater aquifers (Stanford Doerr news brief summarizing Rosemary Knight's research, ["Scientists map fastest pathways for replenishing Central Valley groundwater"](https://sustainability.stanford.edu/news/scientists-map-fastest-pathways-replenishing-central-valley-groundwater))
 
-## References
+## Acknowledgements
 
 -   Model inspired by Ch. 6 of Paul Smaldino's (2023) *Modeling Social Behavior*. Princeton University Press.
 
--   Jasechko, et al., (2024) "Rapid groundwater decline and some cases of recovery in aquifers globally". *Nature*. <https://www.nature.com/articles/s41586-023-06879-8>
+## Exercises
+
+### Exercise 1: Disastrous defection
+
+How do you think adding a defection disaster penalty, $\delta > 0$, will affect the prevalence of cooperation in simulations? Develop a computational experiment to investigate how cooperation prevalence is affected for different values of $\delta > 0$. Hint: use `run_trials`, specifying, e.g., `disaster_debit = c(0.1, 0.25, 0.5, 0.75, 1.0, 1.5, 2.0)`, then summarise over `disaster_debit` in `summarise_dynamics` or `summarise_outcomes` and plot, e.g., the mean prevalence at time $t=200$, or whatever is appropriate. 
+
+Do larger values of $\delta$ make cooperation more common? If so, how 
+great must $\delta$ 
+be in order to maintain no-migration cooperation levels for a given migration frequency?
+
+
+### Exercise 2: The shape of cooperation
+
+A.  Create a new computational experiment with this model where you hold $N$ constant but vary the aspect ratio of the grid. For example, if we use 1024 agents we can have a square grid, aspect ratio 1, if we use $W=H=32$ where $W$ is width and $H$ is height. We can generate several other aspect ratios, as shown in the screenshot below.
+B.  This spatial grid has hard boundaries, i.e., agents at the edge have only three neighbors, and the four corner agents have only two neighbors. What effect would you hypothesize if we made our grid into a *tourus* which is essentially the 2D surface of a donut so there are no corners or edges. This can be specified using by setting `periodic = TRUE` in `igraph::make_lattice` when you specify the ABM graph.
+
+![](images/clipboard-2227213626.png){width="350"}
+
+
+### Exercise 3: Reciprocity
+
+Reciprocity can increase selection pressure towards cooperation, whereby agents can adapt their behavior with different partners depending on their cooperation history over several rounds of interactions [@Nowak2006]. In other words, an agent will cooperate with those who have cooperated with them in past interactions, but defect against those who have defected agains them. There are many ways this could be implemented. The most famous is called _tit-for-tat_, which is the strategy where an agent will initially cooperate with a stranger, but if a partner defects against a focal agent, that focal agent will forever defect when partnered with the defecting partner. Implement tit-for-tat as a factor in agent behavior selection strategy, either in place of or in addition to social learning.
+
+### Exercise 4: Interconnected communities
+
+There could be cooperation or defection between communities as well as within communities. In this exercise, create two or more independent grids, then connect the grids probabilistically. For example, you might set a `between_grid_connect_prob` that an edge exists between any two agents/nodes from different grids. How does cooperation change with different numbers and sizes of grids, and between-grid connection probability?
+
+Start with the following demo command to create two grids with different sizes and create a "dijoint union" of the graphs with the `%du%` command in `igraph`. One can then rewire the union of the two grids as follows to create interconnected grids.
+
+```{r}
+#| echo: true
+#| output: true
+library(igraph)
+graph <- 
+  igraph::make_lattice(dimvector=c(5, 4), periodic = FALSE) %du%
+  igraph::make_lattice(dimvector=c(6, 3), periodic = FALSE) %>%
+  igraph::rewire(igraph::each_edge(p = 0.025, loops = FALSE))
+# Set id attribute of graphs so it's in the graph
+V(graph)$id <- 1:length(V(graph))
+tbl <- ggnetwork::ggnetwork(graph)
+  print(as.vector(vs))
+  ggplot2::ggplot(
+    tbl, ggplot2::aes(x=x, y=y, xend=xend, yend=yend)
+  ) + ggnetwork::geom_edges() + ggnetwork::geom_nodes(color = "#347754", size = 8) + ggnetwork::geom_nodetext(ggplot2::aes(label = id), color = "white") + ggplot2::theme_void()
+```
+
+
+
 
 ## Appendix
 
-### Exercises
-
-### CA Central Valley water annotated references {#sec-valley-water-references}
+### CA Central Valley water annotated references and links {#sec-valley-water-references}
 
 -   **Teviston:** Well failures; ongoing reliance. [Reuters](https://www.reuters.com/world/us/california-farm-town-lurches-no-water-polluted-water-2021-11-02/)
 
@@ -154,7 +206,7 @@ coop_game_strategy <- make_learning_strategy(
 
 -   California enacted a groundwater law 7 years ago. But wells are still drying up — and the threat is spreading ([Cal Matters August 18, 2021](https://calmatters.org/environment/2021/08/california-groundwater-dry/))
 
-### Select source code
+### Source code
 
 #### `make_cooperation_model`
 
