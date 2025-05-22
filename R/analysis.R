@@ -3,7 +3,7 @@ library(ggplot2)
 library(dplyr)
 library(purrr)
 library(latex2exp)
-
+library(igraph)
 
 source("R/model.R")
 
@@ -94,6 +94,7 @@ costs_outcomes_visualization <- function(trials = NULL, stop_step = 40,
   
 }
 
+
 plot_migration_prevalence <- function(trials = NULL, stop_step = 40,
                                       coop_cost = 0.2,
                                       migration_rates = c(0.0, 0.025, 0.05, 0.075, 0.1),
@@ -145,12 +146,13 @@ plot_migration_prevalence <- function(trials = NULL, stop_step = 40,
     theme_classic(base_size = 16)
 
   return (p)
-
 }
   
+
 migration_outcomes_summary <- function(trials = NULL, stop_step = 40,
                                        coop_cost = 0.2,
-                                       migration_rates = c(0.0, 0.025, 0.05, 0.075, 0.1),
+                                       migration_rates = 
+                                         c(0.0, 0.025, 0.05, 0.075, 0.1),
                                        n_trials_per_param = 3,
                                        L = 21,
                                        overwrite = F) {
@@ -166,8 +168,9 @@ migration_outcomes_summary <- function(trials = NULL, stop_step = 40,
       disaster_debit = 0.0, 
       stop = stop_step, 
       .progress = TRUE, 
-      syncfile = "migration-experiment.RData", 
-      overwrite = overwrite
+      syncfile = NULL
+      # syncfile = "migration-experiment.RData", 
+      # overwrite = overwrite
     )
   
   return (
@@ -234,7 +237,9 @@ plot_final_step_prevalence <- function(tbl_final_step, base_size = 12) {
   
   final_tstep <- tbl_final_step$Step[1]
   
-  p <- ggplot(tbl_final_step, aes(x = as.numeric(coop_cost), y = Prevalence)) +
+  p <- 
+    ggplot(tbl_final_step, aes(x = as.numeric(coop_cost), 
+                               y = Prevalence)) +
     geom_jitter(size = 2, width = 0.04, alpha = 0.7, color = "dodgerblue") +
     stat_summary(fun = mean, geom = "line", color = "dodgerblue", size = 1.2) +
     scale_x_continuous(

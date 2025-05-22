@@ -1,6 +1,6 @@
 library(igraph)
 library(socmod)
-
+library(purrr)
 
 # Model generator for run_trials
 cooperation_abm_gen <- function(params) {
@@ -51,7 +51,7 @@ make_cooperation_model <- function(grid_height = 11, grid_width = 11,
       disaster_debit = disaster_debit,
       learning_strategy = coop_game_strategy
     ) %>% 
-    initialize_agents(initial_prevalence = 0.5,
+    initialize_agents(initial_prevalence = 0.5,  # initial_prevalence_adaptive 
                       adaptive_behavior = "Cooperate",
                       legacy_behavior = "Defect")
   
@@ -82,6 +82,7 @@ play_game_with_neighbors <- function(focal_agent, model) {
   total_payoff <- 
     sum(purrr::map_vec(
       focal_agent$get_neighbors()$agents,
+      # Define an *anonymous function* to apply to each neighbor
       \(neighbor) play_game(focal_agent, neighbor, model)
       )
     )
@@ -126,6 +127,7 @@ coop_model_step <- function(abm) {
   
   # Use socmod-provided model step function for learning given next_behavior/fitness
   iterate_learning_model(abm)
+  # After interaction and learning, agents migrate
   mu <- abm$get_parameter("migration_rate")
   if (!is.null(mu) && (mu > 0.0)) {
     migration(abm)
@@ -171,7 +173,7 @@ migration <- function(abm) {
     }
   )
 }
-# Check migration is working OK
-abm <- make_cooperation_model(migration_rate = 0.01)
-migration(abm)
 
+# Check migration is working OK
+abm <- make_cooperation_model(migration_rate = 0.1)
+migration(abm)

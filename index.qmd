@@ -5,6 +5,9 @@ date: May 19, 2025
 bibliography: 
   - /Users/mt/workspace/Writing/library.bib
 
+echo: true
+eval: false
+
 format:
   html:
     toc: true
@@ -17,8 +20,6 @@ format:
         - theme-dark.scss
     fontsize: 0.9e
     linestretch: 1.2
-    echo: true
-    eval: false
     attr-source: ".numberLines"
   pdf:
     documentclass: scrreprt
@@ -50,11 +51,11 @@ To study how the prevalence of cooperation varies over time and as $t \to \infty
 
 ### Inspiration behind this article
 
-One of the goals of this article is to demonstrate `socmod` use by analyzing a game theory model of cooperation between agents on a spatial grid. The other goal is to motivate the study with a real-world sustainability problem, groundwater conservation. The model and analysis is inspired by Ch. 6 in Paul Smaldino's book _Modeling Social Behavior_, including some of the exercises below that Paul includes in his analysis: Paul's model is written in NetLogo, with analysis and visualizations done in R, it appears. See Paul's book for how alternative assumptions enable the formal, mathematical analysis of cooperation prevalence in different spatial contexts with migration, as opposed to simulated/generative as done here.
+One of the goals of this article is to demonstrate `socmod` use by analyzing a game theory model of cooperation between agents on a spatial grid. The other goal is to motivate the study with a real-world sustainability problem, groundwater conservation. The model and analysis is inspired by Ch. 6 in Paul Smaldino's book *Modeling Social Behavior*, including some of the exercises below that Paul includes in his analysis: Paul's model is written in NetLogo, with analysis and visualizations done in R, it appears. See Paul's book for how alternative assumptions enable the formal, mathematical analysis of cooperation prevalence in different spatial contexts with migration, as opposed to simulated/generative as done here.
 
 ## Model
 
-The model is implemented in `model.R`. I show code snippets from that file to illustrate how the model works. Agents are located at grid points in a rectangular 2D lattice, though we use a square lattice with $L=51$ agents per side in our analysis here. Agents play a cooperation game, known as the *prisoner's dilemma* game, a common game theory representation of cooperation where a focal agent gets a benefit $b \in [0, \infty)$ if their interaction partner cooperates, but the focal agent pays a cost $-c$ if they choose to cooperate, where $c\in[0, \infty)$. The payoffs from combinations of the four possible combinations of (Cooperate/Defect) x (Cooperate/Defect) for the dyad define the game's *payoff matrix* (@tbl-payoff-matrix).
+The model is implemented in `model.R`. I show code snippets from that file to illustrate how the model works. Agents are located at grid points in a rectangular 2D lattice, though we use a square lattice with $L=21$ agents per side in our analysis here. Agents play a cooperation game, known as the *prisoner's dilemma* game, a common game theory representation of cooperation where a focal agent gets a benefit $b \in [0, \infty)$ if their interaction partner cooperates, but the focal agent pays a cost $-c$ if they choose to cooperate, where $c\in[0, \infty)$. The payoffs from combinations of the four possible combinations of (Cooperate/Defect) x (Cooperate/Defect) for the dyad define the game's *payoff matrix* (@tbl-payoff-matrix).
 
 ### Spatial structure
 
@@ -121,9 +122,28 @@ coop_game_strategy <- make_learning_strategy(
 
 ### Computational experiments
 
-To analyze 
+To analyze how cooperation cost and migration rate affect the emergence of cooperatives in a spatial grid, we systematically vary these variables and
+
+| Parameter | Description | Values / Range |
+|-----------------|---------------------------------|-----------------------|
+| $\gamma$ | Cost to cooperate  | 0.0, 0.1, **0.2**, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8 |
+| $\beta$  | Benefit when partner cooperates | 1.0 |
+| $\mu$ | Migration rate | **0.0**, 0.01, 0.05, 0.1 |
+| $L$ | Agents per row/grid length | 20 |
+| $N$ | Number of agents $N=L^2$ | 400 |
+
+
+#### Implementation
+
+We investigate
 
 ```{r}
+
+# *** INCLUDE IN APPENDIX RUN_TRIALS CONFIGURATIONS TO IMPLEMENT COMPUTATIONAL EXPERIMENTS. REPLACE THIS HERE WITH THE HELPERS, AND POINT TO THE HELPERS BELOW OR GITHUB  ***
+# Set up a 
+coop_costs <- c(0.1, 0.2, 0.3)
+mutation_rates <- seq(0.0, 0.15, 0.05)
+L = 
 trials <- 
       run_trials(
         cooperation_abm_gen, 
@@ -133,6 +153,7 @@ trials <-
         coop_benefit = 1.0, 
         coop_cost = coop_costs, 
         disaster_cost = 0.0, 
+        mutation_rate = mutation_rates,
         stop = stop_step, 
         .progress = TRUE, 
         syncfile = "costs-experiment.RData", 
@@ -141,8 +162,6 @@ trials <-
 ```
 
 ## Analysis
-
-
 
 ## Discussion
 
@@ -158,32 +177,28 @@ trials <-
 
 In this problem we want to understand the effect of migration on cooperation prevalence. Implement "migration" as follows:
 
-1. Add another model parameter: `migration_rate`.
-1. Every agent might migrate. You could iterate through each agent and see `if (runif() < migration_rate)`. A more efficient option might be to use, e.g., `n_migrating <- round((migration_rate * N) / 2.0)`, which can then be used to obtain `migrating_agents_idxs <- sample(1:N, n_migrating)` on each time step, then select a partner for each selected agent from the set of all agents not already set to migrate, which can be found using `setdiff(1:N, migrating_agent_idxs)`.
-1. Set `behavior_current` for each to be that of the other, i.e., exchange `behavior_current`. This can be best done after the `iterate_learning_model` call at the end of the `coop_model_step` definition in `R/model.R`.
+1.  Add another model parameter: `migration_rate`.
+2.  Every agent might migrate. You could iterate through each agent and see `if (runif() < migration_rate)`. A more efficient option might be to use, e.g., `n_migrating <- round((migration_rate * N) / 2.0)`, which can then be used to obtain `migrating_agents_idxs <- sample(1:N, n_migrating)` on each time step, then select a partner for each selected agent from the set of all agents not already set to migrate, which can be found using `setdiff(1:N, migrating_agent_idxs)`.
+3.  Set `behavior_current` for each to be that of the other, i.e., exchange `behavior_current`. This can be best done after the `iterate_learning_model` call at the end of the `coop_model_step` definition in `R/model.R`.
 
-If all goes well you should get a figure that looks like Figure 6.6 in Ch. 6 of Smaldino's (2023) _Modeling Social Behavior_ [@Smaldino2023_Ch6Cooperation].
+If all goes well you should get a figure that looks like Figure 6.6 in Ch. 6 of Smaldino's (2023) *Modeling Social Behavior* [@Smaldino2023_Ch6Cooperation].
 
 ### Exercise 2: Disastrous defection
 
-How do you think adding a defection disaster penalty, $\delta > 0$, will affect the prevalence of cooperation in simulations? Develop a computational experiment to investigate how cooperation prevalence is affected for different values of $\delta > 0$. Hint: use `run_trials`, specifying, e.g., `disaster_debit = c(0.1, 0.25, 0.5, 0.75, 1.0, 1.5, 2.0)`, then summarise over `disaster_debit` in `summarise_dynamics` or `summarise_outcomes` and plot, e.g., the mean prevalence at time $t=200$, or whatever is appropriate. 
+How do you think adding a defection disaster penalty, $\delta > 0$, will affect the prevalence of cooperation in simulations? Develop a computational experiment to investigate how cooperation prevalence is affected for different values of $\delta > 0$. Hint: use `run_trials`, specifying, e.g., `disaster_debit = c(0.1, 0.25, 0.5, 0.75, 1.0, 1.5, 2.0)`, then summarise over `disaster_debit` in `summarise_dynamics` or `summarise_outcomes` and plot, e.g., the mean prevalence at time $t=200$, or whatever is appropriate.
 
-Do larger values of $\delta$ make cooperation more common? If so, how 
-great must $\delta$ 
-be in order to maintain no-migration cooperation levels for a given migration frequency?
-
+Do larger values of $\delta$ make cooperation more common? If so, how great must $\delta$ be in order to maintain no-migration cooperation levels for a given migration frequency?
 
 ### Exercise 3: The shape of cooperation
 
-A.  Create a new computational experiment with this model where you hold $N$ constant but vary the aspect ratio of the grid. For example, if we use 1024 agents we can have a square grid, aspect ratio 1, if we use $W=H=32$ where $W$ is width and $H$ is height. We can generate several other aspect ratios, as shown in the screenshot below.
-B.  This spatial grid has hard boundaries, i.e., agents at the edge have only three neighbors, and the four corner agents have only two neighbors. What effect would you hypothesize if we made our grid into a *tourus* which is essentially the 2D surface of a donut so there are no corners or edges. This can be specified using by setting `periodic = TRUE` in `igraph::make_lattice` when you specify the ABM graph.
+A.  Create a new computational experiment with this model where you hold $N$ constant but vary the aspect ratio of the grid. For example, if we use 1024 agents we can have a square grid, aspect ratio 1, if we use $W=H=32$ where $W$ is width and $H$ is height. We can generate several other aspect ratios, as shown in the screenshot below. Approximately the same number of agents also works, for example, a 10x6 or 11x6 rectangle has approximately the same number of agents as 8x8 = 64.
+B.  This spatial grid has hard/non-periodic boundaries, i.e., agents at the edge have only three neighbors, and the four corner agents have only two neighbors. What effect would you hypothesize if we made our grid into a *tourus* which is essentially the 2D surface of a donut so there are no corners or edges. This can be specified using by setting `periodic = TRUE` in `igraph::make_lattice` when you specify the ABM graph.
 
 ![](images/clipboard-2227213626.png){width="350"}
 
-
 ### Exercise 4: Reciprocity
 
-Reciprocity can increase selection pressure towards cooperation, whereby agents can adapt their behavior with different partners depending on their cooperation history over several rounds of interactions [@Nowak2006]. In other words, an agent will cooperate with those who have cooperated with them in past interactions, but defect against those who have defected agains them. There are many ways this could be implemented. The most famous is called _tit-for-tat_, which is the strategy where an agent will initially cooperate with a stranger, but if a partner defects against a focal agent, that focal agent will forever defect when partnered with the defecting partner. Implement tit-for-tat as a factor in agent behavior selection strategy, either in place of or in addition to social learning.
+Reciprocity can increase selection pressure towards cooperation, whereby agents can adapt their behavior with different partners depending on their cooperation history over several rounds of interactions [@Nowak2006]. In other words, an agent will cooperate with those who have cooperated with them in past interactions, but defect against those who have defected agains them. There are many ways this could be implemented. The most famous is called *tit-for-tat*, which is the strategy where an agent will initially cooperate with a stranger, but if a partner defects against a focal agent, that focal agent will forever defect when partnered with the defecting partner. Implement tit-for-tat as a factor in agent behavior selection strategy, either in place of or in addition to social learning.
 
 ### Exercise 5: Interconnected communities
 
@@ -207,9 +222,6 @@ tbl <- ggnetwork::ggnetwork(graph)
     tbl, ggplot2::aes(x=x, y=y, xend=xend, yend=yend)
   ) + ggnetwork::geom_edges() + ggnetwork::geom_nodes(color = "#347754", size = 8) + ggnetwork::geom_nodetext(ggplot2::aes(label = id), color = "white") + ggplot2::theme_void()
 ```
-
-
-
 
 ## Appendix
 
