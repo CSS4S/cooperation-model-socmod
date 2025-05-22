@@ -1,13 +1,37 @@
 library(ggplot2)
 
+source("R/analysis.R")
+
 #------------- COOPERATION COST PREVALENCE SERIES -------------
 
 
-
-p <- plot_final_step_prevalence(
+# p <- plot_final_step_prevalence()
+make_coopcost_prevalence_plot <- function(save_path = file.path("Figures", 
+                                                                "coopcost_prevalence.png"),
+                                          coop_costs = c(0.0, 0.1, 0.249, 0.25),
+                                          L = 20,
+                                          stop_step = 25,
+                                          width = 8.25, height = 4.5,
+                                          overwrite = F){
+  p <- 
+    plot_costs_prevalences(
+      coop_costs = coop_costs, stop_step = stop_step, 
+      overwrite = overwrite, L = L
+    )
+  
+  ggsave(save_path, p, width = width, height = height, dpi = 300)
+}
 
 
 #------------- EFFECT OF COOPERATION COST ON PREVALENCE AT t = T ----------
+
+plot_outcomes_over_coopcost <- function (data_path = file.path("Data", 
+                                                               "coopcost_outcomes.csv"),
+                                         save_path = file.path("Figures", 
+                                                               "coopcost_outcomes.png"),
+                                         width = 8.25, height = 4.5) {
+  
+}
 
 
 #------------- MIGRATION PREVALENCE SERIES -------------
@@ -16,7 +40,7 @@ p <- plot_final_step_prevalence(
 
 make_migration_prevalence_plot <- function(save_path = 
                                             file.path("Figures", 
-                                                      "migration_outcomes.png"),
+                                                      "migration_prevalence.png"),
                                            migration_rates = c(0.0, 0.075, 0.1125), 
                                            width = 8.25, height = 4.5) {
   p <- 
@@ -59,4 +83,21 @@ plot_outcomes_over_migration <- function(data_path = file.path("Data",
       theme_classic(base_size = 14) 
 
   ggsave(save_path, p, width = width, height = height, dpi = 300)
+}
+
+
+# Plot-making helpers
+make_coopcost_plots <- function() {
+  make_coopcost_prevalence_plot()
+  plot_outcomes_over_coopcost()
+}
+
+make_migration_plots <- function() {
+  make_migration_prevalence_plot()
+  plot_outcomes_over_migration()
+}
+
+make_all_plots <- function() {
+  make_migration_plots()
+  make_coopcost_plots()
 }

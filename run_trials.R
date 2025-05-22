@@ -1,48 +1,52 @@
 source("R/analysis.R")
 
+
 #------------------- COOPERATION COST ANALYSES ------------
 
-coopcost_outcomes_full <- coopcost_summary_final_step_tbl()
+# coopcost_outcomes_full <- coopcost_summary_final_step_tbl()
 
-tbl_final_step <- coopcost_summary_final_step_tbl(n_trials_per_param = 10, stop_step = 50, L=21, overwrite = F)
 
+# tbl_final_step <- coopcost_summary_final_step_tbl(
+  # n_trials_per_param = 10, stop_step = 50, L=21, overwrite = F
+# )
 
 
 #------------------- MIGRATION ANALYSES -------------------
 
-
-mig_outcomes_full <- 
-  migration_outcomes_summary(
-    overwrite = T, 
-    migration_rates = seq(0.0, 0.2, 0.025),
-    n_trials_per_param = 20, 
-    L = 21
-)
+# mig_outcomes_full <- 
+#   migration_outcomes_summary(
+#     overwrite = T, 
+#     migration_rates = seq(0.0, 0.2, 0.025),
+#     n_trials_per_param = 20, 
+#     L = 21
+# )
 
 
 # Run all trials 
-run_all_migration_trials <- function(overwrite = T, 
-                                     migration_rates = seq(0.0, 0.175, 0.025),     
-                                     coop_costs = c(0.2),
+run_all_migration_trials <- function(migration_rates = seq(0.0, 0.175, 0.025),     
+                                     coop_cost = 0.2,
                                      n_trials_per_param = 3, 
                                      L = 20,
-                                     .dev = TRUE) {
+                                     save_path = file.path("Data", "migration_outcomes.csv"),
+                                     overwrite = F) {
 
-  if (.dev) {
-    n_trials_per_param <- 3, 
-    migration_rates <- c(0.0, 0.05, 0.1, 0.175)
-    L <- 10
-    coop_costs <- c(0.2)
+  if (!file.exists(save_path) || overwrite) {
+    outcomes <- migration_outcomes_summary(
+      migration_rates = migration_rates,
+      coop_cost = coop_cost,
+      L = L,
+      n_trials_per_param = n_trials_per_param,
+      # Don't sync raw trial data in this version of the automated analysis
+      overwrite = F
+    ) 
+
+    readr::write_csv(outcomes, save_path)
+  } else {
+    
+    outcomes <- readr::read_csv(save_path)
   }
 
-  migration_outcomes_summary(
-    migration_rates = migration_rates,
-    coop_costs = coop_costs,
-    L = L,
-    n_trials_per_param = n_trials_per_param,
-    # Never overwrite in this version of the automated analysis
-    overwrite = F
-  ) 
+  return (outcomes)
 }
 
 
@@ -56,5 +60,3 @@ run_all <- function(sync_dir = "Data/", sync_root = NULL) {
   run_all_migration_trials(.make_save_path("migration.csv")) 
 }
 
-
-# run_all()

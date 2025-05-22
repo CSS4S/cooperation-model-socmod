@@ -173,19 +173,19 @@ migration_outcomes_summary <- function(trials = NULL, stop_step = 40,
       # overwrite = overwrite
     )
   
-  summarise_prevalence(
-    trials, 
-    input_parameters = "migration_rate",
-    tracked_behaviors = c("Cooperate"),
-    across_trials = FALSE
-  ) %>%
-    mutate(
-      migration_rate = factor(migration_rate, unique(migration_rates))
+  return (
+    summarise_prevalence(
+      trials, 
+      input_parameters = "migration_rate",
+      tracked_behaviors = c("Cooperate"),
+      across_trials = FALSE
     ) %>%
-    group_by(trial_id) %>%
-    filter(Step == max(Step))
-
-  return ()
+      mutate(
+        migration_rate = factor(migration_rate, unique(migration_rates))
+      ) %>%
+      group_by(trial_id) %>%
+      filter(Step == max(Step))
+    )
 }
 
 
@@ -193,7 +193,7 @@ coopcost_summary_final_step_tbl <- function(trials = NULL, stop_step = 40,
                                           coop_costs = seq(0.175, 0.325, 0.05),
                                           migration_rate = 0.0,
                                           n_trials_per_param = 5,
-                                          L = 21,
+                                          L = 20,
                                           overwrite = F) {
   if (is.null(trials)) {
     trials <- 
@@ -208,6 +208,7 @@ coopcost_summary_final_step_tbl <- function(trials = NULL, stop_step = 40,
         disaster_debit = 0.0, 
         stop = stop_step, 
         .progress = TRUE, 
+
         # No writing to syncfiles for trials in this analysis, too slow
         syncfile = NULL,
         overwrite = F
@@ -217,7 +218,7 @@ coopcost_summary_final_step_tbl <- function(trials = NULL, stop_step = 40,
   return (
     summarise_prevalence(
       trials, 
-      input_parameters = c("coop_cost", "migration_rate"),
+      input_parameters = "coop_cost",
       tracked_behaviors = c("Cooperate"),
       across_trials = FALSE
     ) %>%

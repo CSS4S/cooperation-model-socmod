@@ -12,6 +12,50 @@ cooperation_abm_gen <- function(params) {
   )
 }
 
+# Model step used to specify the LearningStrategy 
+coop_model_step <- function(abm) {
+  
+  # Each agent plays game, receiving a total fitness from playing with each neighbor
+  for (agent in abm$agents) {
+    play_game_with_neighbors(agent, abm)
+  }
+  
+  # After each agent plays, iterate through again to do success-biased learning,
+  # but rescaling to deal with potentially negative fitness values
+  purrr::walk(
+    abm$agents,
+    \(agent) {
+      # Get focal agent's neighbors
+      neighbors <- agent$get_neighbors()
+      
+      # Calculate unscaled weights
+      weights <- purrr::map_vec(
+        unname(neighbors$agents), \(n) n$fitness_current
+      )
+      
+      max_idx <- which.max(weights)
+      
+      teacher <- neighbors$agents[[max_idx]]
+      # Only use teacher's behavior if they have a higher fitness
+      if (teacher$fitness_current > agent$fitness_current) {
+        agent$set_next_behavior(teacher$behavior_current)
+      }
+      
+      # Agent-level fitness resets after each round (i.e. time step in this case)
+      agent$set_next_fitness(0.0)
+    }
+  )
+  
+  # Use socmod-provided model step function for learning given next_behavior/fitness
+  iterate_learning_model(abm)
+  # After interaction and learning, agents migrate
+  mu <- abm$get_parameter("migration_rate")
+  if (!is.null(mu) && (mu > 0.0)) {
+    migration(abm)
+  }
+}
+
+
 # For this normal game in this format we don't have individual partner selection 
 # and interaction steps. Instead all is handled in the model_step, 
 # i.e., coop_model_step defined below
@@ -90,49 +134,6 @@ play_game_with_neighbors <- function(focal_agent, model) {
   focal_agent$fitness_current <- total_payoff
 }
 
-
-# Model step used to specify the LearningStrategy 
-coop_model_step <- function(abm) {
-  
-  # Each agent plays game, receiving a total fitness from playing with each neighbor
-  for (agent in abm$agents) {
-    play_game_with_neighbors(agent, abm)
-  }
-  
-  # After each agent plays, iterate through again to do success-biased learning,
-  # but rescaling to deal with potentially negative fitness values
-  purrr::walk(
-    abm$agents,
-    \(agent) {
-      # Get focal agent's neighbors
-      neighbors <- agent$get_neighbors()
-      
-      # Calculate unscaled weights
-      weights <- purrr::map_vec(
-        unname(neighbors$agents), \(n) n$fitness_current
-      )
-      
-      max_idx <- which.max(weights)
-      
-      teacher <- neighbors$agents[[max_idx]]
-      # Only use teacher's behavior if they have a higher fitness
-      if (teacher$fitness_current > agent$fitness_current) {
-        agent$set_next_behavior(teacher$behavior_current)
-      }
-      
-      # Agent-level fitness resets after each round (i.e. time step in this case)
-      agent$set_next_fitness(0.0)
-    }
-  )
-  
-  # Use socmod-provided model step function for learning given next_behavior/fitness
-  iterate_learning_model(abm)
-  # After interaction and learning, agents migrate
-  mu <- abm$get_parameter("migration_rate")
-  if (!is.null(mu) && (mu > 0.0)) {
-    migration(abm)
-  }
-}
 
 
 # Assumes that there are an even number of agents migrating
