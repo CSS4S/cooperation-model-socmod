@@ -42,15 +42,9 @@ plot_outcomes_over_coopcost <- function (data_path = file.path("Data",
       geom_jitter(size = 2, width = 0.005, alpha = 0.7, color = "dodgerblue") +
       stat_summary(fun = mean, geom = "line", color = "dodgerblue", linewidth = 1.2) +
       scale_x_continuous(
-    name = TeX("Cooperation cost, $\\gamma$"),
-    breaks = breaks, labels = scales::number_format(accuracy = 0.001)
-
-  ) +
-      # scale_x_continuous(
-      #   breaks = seq_along(levels(outcomes$coop_cost)), 
-      #   # breaks = seq_along(levels(outcomes$coop_cost)), 
-      #   labels = levels(outcomes$coop_cost)
-      # ) + 
+        name = TeX("Cooperation cost, $\\gamma$"),
+        breaks = breaks, labels = scales::number_format(accuracy = 0.001)
+      ) +
       xlab(TeX("Cooperation cost, $\\gamma$")) + 
       ylab(paste0("Cooperator prevalence at t = 50")) + 
       theme_classic(base_size = 14) 
