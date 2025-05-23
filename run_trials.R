@@ -21,6 +21,31 @@ source("R/analysis.R")
 #     L = 21
 # )
 
+run_all_coopcost_trials <- function(coop_costs = c(0.0, 0.1, 0.2, 0.245, 0.24999, 0.25, 0.3),
+                                    migration_rate = 0.0,
+                                    n_trials_per_param = 20,
+                                    L = 20,
+                                    stop_step = 50,
+                                    save_path = file.path("Data", "coopcost_outcomes.csv"),
+                                    overwrite = F) {
+
+  if (!file.exists(save_path) || overwrite) {
+    outcomes <- coopcost_outcomes_summary(
+      coop_costs = coop_costs,
+      L = L,
+      stop_step = stop_step,
+      n_trials_per_param = n_trials_per_param,
+    ) 
+
+    readr::write_csv(outcomes, save_path)
+  } else {
+    
+    outcomes <- readr::read_csv(save_path)
+  }
+
+  return (outcomes)
+}
+
 
 # Run all trials 
 run_all_migration_trials <- function(migration_rates = seq(0.0, 0.175, 0.025),     

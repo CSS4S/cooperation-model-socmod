@@ -189,7 +189,7 @@ migration_outcomes_summary <- function(trials = NULL, stop_step = 40,
 }
 
 
-coopcost_summary_final_step_tbl <- function(trials = NULL, stop_step = 40,
+coopcost_outcomes_summary <- function(trials = NULL, stop_step = 40,
                                           coop_costs = seq(0.175, 0.325, 0.05),
                                           migration_rate = 0.0,
                                           n_trials_per_param = 5,
