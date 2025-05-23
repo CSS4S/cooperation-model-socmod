@@ -61,6 +61,40 @@ The model is implemented in `model.R`. I show code snippets from that file to il
 
 Spatial structure, we hypothesize, provides the substrate for cooperation to take hold since neighbors can form spatially organized *cooperatives*, i.e., clusters of contiguous, connected cooperators. We represent spatial structure by locating agent nodes in a two-dimensional lattice graph we set to be square with side length $L$, so the agent population size is $N = L^2$. The model grid can be rectangular in general, and it is left as an exercise to the reader to test what happens when $N$ is held constant but the aspect ratio of the grid is varied, i.e., the width divided by the height.
 
+First consider a grid with $L=6$ agents per side, so $N=36$ population size.
+
+```{r}
+#| eval: true
+#| fig-width: 3.85
+#| fig-asp: 0.65
+source("R/model.R")
+
+L = 6
+
+plot_example_adoptnet <- function(abm, layout = igraph::on_grid()) {
+  plot_network_adoption(
+    abm, 
+    layout = layout,
+    behaviors = c("Cooperate", "Defect"), 
+    behavior_colors = c("#0486C1", "#D38855")
+  )
+}
+
+# Using defaults coop_benefit = 1.0 and coop_cost = 0.2
+abm <- make_cooperation_model(grid_width = L, grid_height = L)
+plot_example_adoptnet(abm)
+```
+
+We can make a rectangle with the same number of agents like so
+
+```{r}
+#| eval: true
+#| fig-width: 4.15
+#| fig-asp: 0.65
+abm <- make_cooperation_model(grid_width = 9, grid_height = 4)
+plot_example_adoptnet(abm, layout = NULL)
+```
+
 ### Social interaction and payoffs {#sec-social-interaction-and-payoffs}
 
 Agents interact with all of their neighbors on each time step, collecting payoffs according to whether an agent and each neighbor is currently doing the "Cooperate" or "Defect" behavior, or equivalently whether each agent is a cooperator or defector.
@@ -127,44 +161,36 @@ To analyze how cooperation cost and migration rate affect the emergence of coope
 #### Model parameters
 
 | Parameter | Description | Values / Range |
-|-----------------|---------------------------------|-----------------------|
-| $\gamma$| Cost to cooperate| 0.0, 0.1, **0.2**, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8 |
-| $\beta$  | Benefit when partner cooperates | 1.0 |
+|-------------------|-------------------------------|----------------------|
+| $\gamma$ | Cost to cooperate | 0.0, 0.1, **0.2**, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8 |
+| $\beta$ | Benefit when partner cooperates | 1.0 |
 | $\mu$ | Migration rate | **0.0**, 0.025, 0.05, 0.1, 0.15, |
-| $L$ | Agents per row/grid length | _5_, _10_, **20** |
+| $L$ | Agents per row/grid length | *5*, *10*, **20** |
 | $N$ | Number of agents $N=L^2$ | 400 |
 
 : **Model parameter descriptions and settings.** Values in italic indicate suggested "starter values" to begin development. Bold are the default values in the analyses we present here. {#tbl-params}
- 
 
 #### Computational analysis configuration settings
 
-| Description | Values |
-|-----------------|---------------------------------|
-| Final time step of simulation | _20_, **50**
-| Number of trials per parameter setting  | _3_, _5_, **20** |
+| Description                            | Values           |
+|----------------------------------------|------------------|
+| Final time step of simulation          | *20*, **50**     |
+| Number of trials per parameter setting | *3*, *5*, **20** |
 
 : **Computational analysis configuration parameter descriptions and settings.** Values in italic indicate suggested "starter values" to begin development. Bold are the default values in the analyses we present here.
 
 #### Outcome measures
 
-We measure cooperator prevalence over time to compare its dynamics for different parameter settings. We also extract the prevalence at the end of each trial and
-aggregate across trials for different parameter settings to estimate the average
-equilibrium value, or range of equilibria values, of the dynamics as 
-$t \to \infty$. 
-
+We measure cooperator prevalence over time to compare its dynamics for different parameter settings. We also extract the prevalence at the end of each trial and aggregate across trials for different parameter settings to estimate the average equilibrium value, or range of equilibria values, of the dynamics as $t \to \infty$.
 
 | Outcome measure | Description | Values / Range |
-|-----------------|---------------------------------|-----------------------|
-| $p_C(t)$ | Cooperator prevalence over time  | $[0.0, 1.0]$ |
+|-------------------|-------------------------------|----------------------|
+| $p_C(t)$ | Cooperator prevalence over time | $[0.0, 1.0]$ |
 | $p_C(t=T=50),$ $\langle p_C(T)\rangle$ | Cooperator prevalence and average prevalence across trials at $t=T$, using $T=50$ here | $[0.0, 1.0]$ |
 
 : **Outcome measures, description, and range.** We observe cooperator prevalence dynamics and analyze the final apprixmate equilibrium prevalence at $t=T$. {#tbl-outcome-measures}
 
-
 #### Implementation
-
-
 
 ```{r}
 
@@ -192,18 +218,27 @@ trials <-
 
 ## Analysis
 
+-   We examined how cooperation cost and migration rate separately affect the emergence and maintenance of cooperation in simulated populations.
+-   We confirmed computationally that at or beyond critical cooperation cost, $\gamma_c = \beta / 4$, stable cooperatives cannot form, the defect behavior fixates, and cooperation goes extinct (@fig-transition-conditions A).
+-   A similar analysis of a minimal five-agent "cross" or "plus" cooperative is unstable if $2\beta > 4\beta - 4\gamma$, i.e., if $\gamma > \beta / 2$ (@fig-transition-conditions B).
+
+![**Defector-turns-cooperator and cooperator-turns defector conditions in the founding and destruction of cooperatives.** Three cooperators in a line will result in new cooperators adjacent to the middle node of the triad if the cost of cooperation is less one quarter of the cooperation benefit, i.e., $\gamma < \gamma_c = \beta / 4$ (A). A five-agent "cross" cooperative is unstable if the cost of cooperation is greater than half of the benefit: $\gamma > \beta / 2$. Adapted from Smaldino (2023), Figure 6.4. ](images/clipboard-375699287.png){#fig-transition-conditions fig-align="center" width="650"}
+
 ### When does cost of cooperation become prohibitive?
 
+-   Theoretically, the grid can support cooperation as long as \$\beta \>
+
 ![**Dynamics of cooperator prevalence as a function of cooperation cost.**](Figures/coopcost_prevalence.png)
+
+-   
+
 ![**Dynamics of cooperator prevalence as a function of cooperation cost.**](Figures/coopcost_outcomes.png)
-
-
 
 ### When does migration undermine cooperation?
 
-![**Cooperator prevalence dynamics as a function of migration rate.** ](Figures/migration_prevalence_50_steps_usethis.png)
+![**Cooperator prevalence dynamics as a function of migration rate.**](Figures/migration_prevalence_50_steps_usethis.png)
 
-![**Cooperator prevalence at $t=50$ over migration rate.** Cooperator prevalence ends up at majority levels (when)](Figures/migration_outcomes.png)
+![**Cooperator prevalence at** $t=50$ over migration rate. Cooperator prevalence ends up at majority levels (when)](Figures/migration_outcomes.png)
 
 ## Discussion
 
@@ -254,7 +289,6 @@ tbl <- ggnetwork::ggnetwork(graph)
     tbl, ggplot2::aes(x=x, y=y, xend=xend, yend=yend)
   ) + ggnetwork::geom_edges() + ggnetwork::geom_nodes(color = "#347754", size = 8) + ggnetwork::geom_nodetext(ggplot2::aes(label = id), color = "white") + ggplot2::theme_void()
 ```
-
 
 ## Appendix
 

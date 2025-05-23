@@ -67,7 +67,7 @@ coop_game_strategy <- make_learning_strategy(
 )
 
 make_cooperation_model <- function(grid_height = 11, grid_width = 11, 
-                                   coop_benefit = 1.0, coop_cost = 0.25,
+                                   coop_benefit = 1.0, coop_cost = 0.2,
                                    disaster_debit = 0.0, migration_rate = 0.0) {
   # Set up spatial grid
   g <- make_lattice(
