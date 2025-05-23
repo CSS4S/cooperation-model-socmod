@@ -164,7 +164,7 @@ $t \to \infty$.
 
 #### Implementation
 
-Two functions run 
+
 
 ```{r}
 
@@ -194,11 +194,16 @@ trials <-
 
 ### When does cost of cooperation become prohibitive?
 
+![**Dynamics of cooperator prevalence as a function of cooperation cost.**](Figures/coopcost_prevalence.png)
+![**Dynamics of cooperator prevalence as a function of cooperation cost.**](Figures/coopcost_outcomes.png)
+
+
 
 ### When does migration undermine cooperation?
 
+![**Cooperator prevalence dynamics as a function of migration rate.** ](Figures/migration_prevalence_50_steps_usethis.png)
 
-![**Cooperator prevalence at $t=50$ over migration rate.** Cooperator prevalence ends up at majority levels ]
+![**Cooperator prevalence at $t=50$ over migration rate.** Cooperator prevalence ends up at majority levels (when)](Figures/migration_outcomes.png)
 
 ## Discussion
 
