@@ -21,13 +21,11 @@ format:
     fontsize: 0.9e
     linestretch: 1.2
     attr-source: ".numberLines"
-  pdf:
-    documentclass: scrreprt
 ---
 
 ## Introduction
 
-In California's Central Valley, farms, orchards, dairies, and other agricultural industries use disproportionately more water than the communities where farm workers live in an increasingly precarious state. Wells increasingly run dry when they aren't contaminated by deadly chemicals first. The state-level water restriction enforcement agency has recently rejected several plans proposed by local water district planners. All this currently occurs against a backdrop of climate variability and political instability that increasingly drives the migration of farmers and farm workers alike. This problem is increasingly accute across diverse societies and aquifers, though in some cases groundwater is being restored to previously overdrawn aquifers [@Jasechko2024].
+In California's Central Valley, farms, orchards, dairies, and other agricultural industries use disproportionately more water than the communities where farm workers live in an increasingly precarious state. Wells increasingly run dry when they aren't contaminated by deadly chemicals first. The state-level water restriction enforcement agency has recently rejected several plans proposed by local water district planners. All this currently occurs against a backdrop of climate variability and political instability that increasingly drives the migration of farmers and farm workers alike (see [CA Central Valley water annotated references and links](#sec-valley-water-references) below). This problem is increasingly acute across diverse societies and aquifers, though in some cases groundwater is being restored to previously overdrawn aquifers [@Jasechko2024].
 
 Equitable access to clean potable water depends on cooperation among those sharing groundwater aquifers, consistent with the UN Sustainable Development Goals (SDGs) [to Reduce Inequalities (SDG 10)](https://sdgs.un.org/goals/goal10) and [to provide Clean Water and Sanitation (SDG 6)](https://sdgs.un.org/goals/goal6), representing [Group I and Group B goals](https://css4s.github.io/abm-notes/intro.html#course-outline-in-the-context-of-sustainable-development) to, in general, support *infrastructure*/*institutions* and *basic human needs*, respectively. Cooperation to sustain groundwater resources is increasingly important since there are more frequent climate change-driven droughts threatening human and non-human life on land. This project, then, also addresses Group E (*environmental and ecological protection*) Sustainable Development Goals, namely to accelerate relevant [Climate Action (SDG 13)](https://sdgs.un.org/goals/goal13), and to protect the literal bedrock of ecosystems that support all [Life on Land (SDG 15)](https://sdgs.un.org/goals/goal15).
 
@@ -65,6 +63,7 @@ First consider a grid with $L=6$ agents per side, so $N=36$ population size.
 
 ```{r}
 #| eval: true
+#| message: false
 #| fig-width: 3.85
 #| fig-asp: 0.65
 source("R/model.R")
@@ -156,32 +155,36 @@ coop_game_strategy <- make_learning_strategy(
 
 ### Computational analysis design
 
-To analyze how cooperation cost and migration rate affect the emergence of cooperatives in a spatial grid, we systematically vary these variables and
+To analyze how cooperation cost and migration rate affect the emergence of cooperatives in a spatial grid, we systematically vary these variables (@tbl-params) and observe the dynamics of cooperation prevalence over time and our main outcome measure, the prevalence of cooperators at $t=50$, $p_C(t=50)$ (@tbl-outcome-measures). Specifically we first vary the cost of cooperation, $\gamma$, setting the migration rate $\mu = 0.0$, and observe the results. Second, we vary $\mu$, setting $\gamma = 0.2$, and observe the results.
 
 #### Model parameters
 
+The model parameters specify how agent learning and migration behavior work. They also set the size of the grid, which indirectly sets the number of agents. We systematically vary two of these, $\gamma$ and $\mu$, and observe the dynamics and outcomes to implement our computational experiments.
+
 | Parameter | Description | Values / Range |
 |-------------------|-------------------------------|----------------------|
-| $\gamma$ | Cost to cooperate | 0.0, 0.1, **0.2**, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8 |
+| $\gamma$ | Cost to cooperate | 0.0, 0.1, **0.2**, 0.249, 0.25, 0.3 |
+| $\mu$ | Migration rate | **0.0**, 0.025, 0.05, ..., 0.175, 0.2 |
 | $\beta$ | Benefit when partner cooperates | 1.0 |
-| $\mu$ | Migration rate | **0.0**, 0.025, 0.05, 0.1, 0.15, |
 | $L$ | Agents per row/grid length | *5*, *10*, **20** |
-| $N$ | Number of agents $N=L^2$ | 400 |
+| $N$ | Number of agents $N=L^2$ | **400** |
 
 : **Model parameter descriptions and settings.** Values in italic indicate suggested "starter values" to begin development. Bold are the default values in the analyses we present here. {#tbl-params}
 
 #### Computational analysis configuration settings
+
+There are additional parameters that specify how simulation trials work (@tbl-trials-config). In our analysis of outcome variable $p_C(t)$, we run many simulations for each outcome type, dynamics or long-time "equilibrium" outcomes. We use $t=50$ for the final time step and 20 trials per parameter setting in the outcome analyses below. For the . When developing the full output results, it is often useful to start with smaller values for each of these, with potential development values represented with italic font in @tbl-trials-config.
 
 | Description                            | Values           |
 |----------------------------------------|------------------|
 | Final time step of simulation          | *20*, **50**     |
 | Number of trials per parameter setting | *3*, *5*, **20** |
 
-: **Computational analysis configuration parameter descriptions and settings.** Values in italic indicate suggested "starter values" to begin development. Bold are the default values in the analyses we present here.
+: **Computational analysis configuration parameter descriptions and settings.** Values in italic indicate suggested "starter values" to begin development. Bold are the default values in the analyses we present here. {#tbl-trials-config}
 
 #### Outcome measures
 
-We measure cooperator prevalence over time to compare its dynamics for different parameter settings. We also extract the prevalence at the end of each trial and aggregate across trials for different parameter settings to estimate the average equilibrium value, or range of equilibria values, of the dynamics as $t \to \infty$.
+We measure cooperator prevalence over time to compare its dynamics for different parameter settings. We also extract the prevalence at the end of each trial and aggregate across trials for different parameter settings to estimate the average equilibrium value, or range of equilibria values, of the dynamics as $t \to \infty$ (@tbl-outcome-measures).
 
 | Outcome measure | Description | Values / Range |
 |-------------------|-------------------------------|----------------------|
@@ -218,32 +221,39 @@ trials <-
 
 ## Analysis
 
--   We examined how cooperation cost and migration rate separately affect the emergence and maintenance of cooperation in simulated populations.
--   We confirmed computationally that at or beyond critical cooperation cost, $\gamma_c = \beta / 4$, stable cooperatives cannot form, the defect behavior fixates, and cooperation goes extinct (@fig-transition-conditions A).
--   A similar analysis of a minimal five-agent "cross" or "plus" cooperative is unstable if $2\beta > 4\beta - 4\gamma$, i.e., if $\gamma > \beta / 2$ (@fig-transition-conditions B).
+To understand how the perceived risk or cost of cooperation and the mutation rate each affect the emergence of cooperation, we examined how cooperation cost and migration rate separately affect the emergence and maintenance of cooperation in simulated populations. We confirmed computationally that at or beyond critical cooperation cost, $\gamma_c = \beta / 4$, stable cooperatives cannot form, the defect behavior fixates, and cooperation goes extinct (@fig-transition-conditions A). A similar analysis of a minimal five-agent "cross" or "plus" cooperative is unstable if $2\beta > 4\beta - 4\gamma$, i.e., if $\gamma > \beta / 2$ (@fig-transition-conditions B). This explains why we observe such a sharp transition from widespread cooperation to zero cooperation.
+
+
 
 ![**Defector-turns-cooperator and cooperator-turns defector conditions in the founding and destruction of cooperatives.** Three cooperators in a line will result in new cooperators adjacent to the middle node of the triad if the cost of cooperation is less one quarter of the cooperation benefit, i.e., $\gamma < \gamma_c = \beta / 4$ (A). A five-agent "cross" cooperative is unstable if the cost of cooperation is greater than half of the benefit: $\gamma > \beta / 2$. Adapted from Smaldino (2023), Figure 6.4. ](images/clipboard-375699287.png){#fig-transition-conditions fig-align="center" width="650"}
 
 ### When does cost of cooperation become prohibitive?
 
-- We indeed see evidence that many non-zero equilibria exist for cooperation costs up to 0.25, including up to 0.249! 
-- In our initial conditions with half of the agents starting as cooperators, the prevalence of cooperators decreases initially as the relatively isolated cooperators become defectors. Then more and more agents join nascent cooperatives, so the prevalence eventually begins to increase again. When cooperation cost is 0, the dip is lowest, and cooperatives begin to grow and expand cooperator prevalence to their maximum values earlier on compared to  greater cooperation costs with $\gamma < \beta / 4$ (@fig-cooperation-dynamics). 
+We see that cooperation emerges at various non-zero equilibrium values for cooperation costs up to 0.25, including up to 0.249 (@fig-cooperation-over-cost)! In our initial conditions with half of the agents starting as cooperators, the prevalence of cooperators decreases initially as the relatively isolated cooperators become defectors (@fig-cooperation-dynamics). Then more and more agents join nascent cooperatives, so the prevalence eventually begins to increase again. When cooperation cost is 0, the dip is lowest, and cooperatives begin to grow and expand cooperator prevalence to their maximum values earlier on compared to  greater cooperation costs with $\gamma < \beta / 4$.
 
 ![**Dynamics of cooperator prevalence as a function of cooperation cost.**](Figures/coopcost_prevalence.png){#fig-cooperation-dynamics}
 
-- 
-
-![**Dynamics of cooperator prevalence as a function of cooperation cost.**](Figures/coopcost_outcomes.png) {#fig-cooperation-over-cost}
+![**Dynamics of cooperator prevalence as a function of cooperation cost.**](Figures/coopcost_outcomes.png){#fig-cooperation-over-cost}
 
 ### When does migration undermine cooperation?
 
-![**Cooperator prevalence dynamics as a function of migration rate.**](Figures/migration_prevalence_50_steps_usethis.png)
+Migration, as hypothesized, can undermine cooperation. Based on our reasoning to explain why cooperation is only supported up to $\gamma = 0.25$, we see that for cooperators to spread, there must be at least three lined up to seed a cooperative that grows into a cluster of cooperators. For this particular choice of parameters, cooperatives can reliably grow only when the migration rate is less than 0.125 (@fig-migration-outcomes), but there is high variability in the cooperator prevalence as $\mu$ approaches 0.125, indicating that the cooperatives are unstable (@fig-migration-dynamics). 
 
-![**Cooperator prevalence at** $t=50$ over migration rate. Cooperator prevalence ends up at majority levels (when)](Figures/migration_outcomes.png)
+![**Cooperator prevalence dynamics as a function of migration rate.**](Figures/migration_prevalence_50_steps_usethis.png){#fig-migration-dynamics}
+
+![**Cooperator prevalence at** $t=50$ over migration rate. Cooperator prevalence ends up at majority levels (when)](Figures/migration_outcomes.png){#fig-migration-outcomes}
 
 ## Discussion
 
--   Promote adaptive mitigation: possible to focus groundwater recharge on the areas with the most amenable geological qualities for replenishing the groundwater aquifers (Stanford Doerr news brief summarizing Rosemary Knight's research, ["Scientists map fastest pathways for replenishing Central Valley groundwater"](https://sustainability.stanford.edu/news/scientists-map-fastest-pathways-replenishing-central-valley-groundwater))
+We found that there exist critical cooperation cost/risk values that, when exceeded, cause cooperation to collapse. If we intend to use these models to promote climate action via sustainable adaptations, then this guides us to focus on (1) the perceived cost or risk of cooperation to farmers and municipalities; and (2) the induced migration patterns induced by climate change and other risk factor in the California groundwater case. 
+
+This model made several strategic assumptions to make it tractable to analyze, however these were selected at the exclusion of other factors. See the Exercises below for a review of some details we left out and a guide to exploring alternative assumptions on your own.
+
+- comparison with previous work
+
+- (broader implications) This indicates we should be focusing groundwater recharge on the areas with the most amenable geological qualities for replenishing the groundwater aquifers (Stanford Doerr news brief summarizing Rosemary Knight's research, ["Scientists map fastest pathways for replenishing Central Valley groundwater"](https://sustainability.stanford.edu/news/scientists-map-fastest-pathways-replenishing-central-valley-groundwater))
+
+- Conclusion
 
 ## Acknowledgements
 
@@ -259,8 +269,10 @@ Do larger values of $\delta$ make cooperation more common? If so, how great must
 
 ### Exercise 2: The shape of cooperation
 
-A.  Create a new computational experiment with this model where you hold $N$ constant but vary the aspect ratio of the grid. For example, if we use 1024 agents we can have a square grid, aspect ratio 1, if we use $W=H=32$ where $W$ is width and $H$ is height. We can generate several other aspect ratios, as shown in the screenshot below. Approximately the same number of agents also works, for example, a 10x6 or 11x6 rectangle has approximately the same number of agents as 8x8 = 64.
+A.  Create a new computational experiment with this model where you hold $N$ constant but vary the aspect ratio of the grid. For example, if we use 1024 agents we can have a square grid, aspect ratio 1, if we use $W=H=$ where $W$ is width and $H$ is height. We can generate several other aspect ratios, as shown in the screenshot below. Approximately the same number of agents also works, for example, a 10x6 or 11x6 rectangle has approximately the same number of agents as 8x8 = 64.
 B.  This spatial grid has hard/non-periodic boundaries, i.e., agents at the edge have only three neighbors, and the four corner agents have only two neighbors. What effect would you hypothesize if we made our grid into a *tourus* which is essentially the 2D surface of a donut so there are no corners or edges. This can be specified using by setting `periodic = TRUE` in `igraph::make_lattice` when you specify the ABM graph.
+
+If you want a larger population with more aspect ratios, that will take a longer time to run, but provides more options 
 
 ![](images/clipboard-2227213626.png){width="350"}
 
@@ -272,11 +284,15 @@ Reciprocity can increase selection pressure towards cooperation, whereby agents 
 
 There could be cooperation or defection between communities as well as within communities. In this exercise, create two or more independent grids, then connect the grids probabilistically. For example, you might set a `between_grid_connect_prob` that an edge exists between any two agents/nodes from different grids. How does cooperation change with different numbers and sizes of grids, and between-grid connection probability?
 
-Start with the following demo command to create two grids with different sizes and create a "dijoint union" of the graphs with the `%du%` command in `igraph`. One can then rewire the union of the two grids as follows to create interconnected grids.
+Start with the following demo command to create two grids with different sizes and create a "disjoint union" of the graphs with the `%du%` command in `igraph`. One can then rewire the union of the two grids as follows to create interconnected grids.
 
 ```{r}
 #| echo: true
 #| output: true
+#| eval: true
+#| fig-width: 3.85
+#| fig-asp: 0.65
+
 library(igraph)
 graph <- 
   igraph::make_lattice(dimvector=c(5, 4), periodic = FALSE) %du%
@@ -285,10 +301,14 @@ graph <-
 # Set id attribute of graphs so it's in the graph
 V(graph)$id <- 1:length(V(graph))
 tbl <- ggnetwork::ggnetwork(graph)
-  print(as.vector(vs))
-  ggplot2::ggplot(
+
+ggplot2::ggplot(
     tbl, ggplot2::aes(x=x, y=y, xend=xend, yend=yend)
-  ) + ggnetwork::geom_edges() + ggnetwork::geom_nodes(color = "#347754", size = 8) + ggnetwork::geom_nodetext(ggplot2::aes(label = id), color = "white") + ggplot2::theme_void()
+  ) + 
+  ggnetwork::geom_edges() + 
+  ggnetwork::geom_nodes(color = "#347754", size = 8) + 
+  ggnetwork::geom_nodetext(ggplot2::aes(label = id), color = "white") + 
+  ggplot2::theme_void()
 ```
 
 ## Appendix

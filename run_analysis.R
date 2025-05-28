@@ -105,11 +105,13 @@ plot_outcomes_over_migration <- function(data_path = file.path("Data",
 
 # Plot-making helpers
 make_coopcost_plots <- function() {
+  print("Making coopcost prevalence dynamics plot, which requires running simulations.")
   make_coopcost_prevalence_plot()
   plot_outcomes_over_coopcost()
 }
 
 make_migration_plots <- function() {
+  print("Making migration prevalence dynamics plot, which requires running simulations.")
   make_migration_prevalence_plot()
   plot_outcomes_over_migration()
 }

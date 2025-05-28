@@ -1,30 +1,11 @@
 source("R/analysis.R")
 
 
-#------------------- COOPERATION COST ANALYSES ------------
-
-# coopcost_outcomes_full <- coopcost_summary_final_step_tbl()
-
-
-# tbl_final_step <- coopcost_summary_final_step_tbl(
-  # n_trials_per_param = 10, stop_step = 50, L=21, overwrite = F
-# )
-
-
-#------------------- MIGRATION ANALYSES -------------------
-
-# mig_outcomes_full <- 
-#   migration_outcomes_summary(
-#     overwrite = T, 
-#     migration_rates = seq(0.0, 0.2, 0.025),
-#     n_trials_per_param = 20, 
-#     L = 21
-# )
-
-run_all_coopcost_trials <- function(coop_costs = c(0.0, 0.1, 0.2, 0.245, 0.24999, 0.25, 0.3),
+# Run all cooperation cost trials
+run_all_coopcost_trials <- function(coop_costs = c(0.0, 0.1, 0.3),
                                     migration_rate = 0.0,
-                                    n_trials_per_param = 20,
-                                    L = 20,
+                                    n_trials_per_param = 3,
+                                    L = 10,
                                     stop_step = 50,
                                     save_path = file.path("Data", "coopcost_outcomes.csv"),
                                     overwrite = F) {
@@ -47,7 +28,7 @@ run_all_coopcost_trials <- function(coop_costs = c(0.0, 0.1, 0.2, 0.245, 0.24999
 }
 
 
-# Run all trials 
+# Run all migration trials 
 run_all_migration_trials <- function(migration_rates = seq(0.0, 0.175, 0.025),     
                                      coop_cost = 0.2,
                                      n_trials_per_param = 3, 
