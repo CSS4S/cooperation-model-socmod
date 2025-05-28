@@ -226,13 +226,14 @@ trials <-
 
 ### When does cost of cooperation become prohibitive?
 
--   Theoretically, the grid can support cooperation as long as \$\beta \>
+- We indeed see evidence that many non-zero equilibria exist for cooperation costs up to 0.25, including up to 0.249! 
+- In our initial conditions with half of the agents starting as cooperators, the prevalence of cooperators decreases initially as the relatively isolated cooperators become defectors. Then more and more agents join nascent cooperatives, so the prevalence eventually begins to increase again. When cooperation cost is 0, the dip is lowest, and cooperatives begin to grow and expand cooperator prevalence to their maximum values earlier on compared to  greater cooperation costs with $\gamma < \beta / 4$ (@fig-cooperation-dynamics). 
 
-![**Dynamics of cooperator prevalence as a function of cooperation cost.**](Figures/coopcost_prevalence.png)
+![**Dynamics of cooperator prevalence as a function of cooperation cost.**](Figures/coopcost_prevalence.png){#fig-cooperation-dynamics}
 
--   
+- 
 
-![**Dynamics of cooperator prevalence as a function of cooperation cost.**](Figures/coopcost_outcomes.png)
+![**Dynamics of cooperator prevalence as a function of cooperation cost.**](Figures/coopcost_outcomes.png) {#fig-cooperation-over-cost}
 
 ### When does migration undermine cooperation?
 
