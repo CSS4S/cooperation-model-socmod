@@ -8,6 +8,11 @@ bibliography:
 echo: true
 eval: false
 
+knitr: 
+  opts_chunk:
+    message: false
+    warning: false
+
 format:
   html:
     toc: true
@@ -192,29 +197,14 @@ We measure cooperator prevalence over time to compare its dynamics for different
 
 #### Implementation
 
-```{r}
+Simulation trial runs and output analysis were performed primarily
+using `socmod`, `igraph`, `ggplot2`, and other `tidyverse` packages, primarily
+`dplyr` for data manipulation and analysis and `purrr` for functional
+programming.
 
-# *** INCLUDE IN APPENDIX RUN_TRIALS CONFIGURATIONS TO IMPLEMENT COMPUTATIONAL EXPERIMENTS. REPLACE THIS HERE WITH THE HELPERS, AND POINT TO THE HELPERS BELOW OR GITHUB  ***
-# Set up a 
-coop_costs <- c(0.1, 0.2, 0.3)
-mutation_rates <- seq(0.0, 0.15, 0.05)
-L = 
-trials <- 
-      run_trials(
-        cooperation_abm_gen, 
-        n_trials_per_param = n_trials_per_param, 
-        grid_height = L, 
-        grid_width = L, 
-        coop_benefit = 1.0, 
-        coop_cost = coop_costs, 
-        disaster_cost = 0.0, 
-        mutation_rate = mutation_rates,
-        stop = stop_step, 
-        .progress = TRUE, 
-        syncfile = "costs-experiment.RData", 
-        overwrite = overwrite
-      )
-```
+See `run_trials.R` for the simulation trial run methods and `run_analysis.R`
+that implements the visualizations and other analyses. All source code is
+available via the GitHub repository for this article.
 
 ## Analysis
 
@@ -226,11 +216,10 @@ trials <-
 
 ### When does cost of cooperation become prohibitive?
 
--   Theoretically, the grid can support cooperation as long as \$\beta \>
+
 
 ![**Dynamics of cooperator prevalence as a function of cooperation cost.**](Figures/coopcost_prevalence.png)
 
--   
 
 ![**Dynamics of cooperator prevalence as a function of cooperation cost.**](Figures/coopcost_outcomes.png)
 
