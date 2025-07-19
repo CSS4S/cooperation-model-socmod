@@ -238,25 +238,42 @@ Migration, as hypothesized, can undermine cooperation. Based on our reasoning to
 
 We found that there exist critical cooperation cost/risk values that, when exceeded, cause cooperation to collapse. If we intend to use these models to promote climate action via sustainable adaptations, then this guides us to focus on (1) the perceived cost or risk of cooperation to farmers and municipalities; and (2) the induced migration patterns induced by climate change and other risk factor in the California groundwater case. 
 
-This model made several strategic assumptions to make it tractable to analyze, however these were selected at the exclusion of other factors. See the Exercises below for a review of some details we left out and a guide to exploring alternative assumptions on your own.
+This model made several strategic assumptions to make it tractable to analyze,
+however these were selected at the exclusion of other factors. Water management
+is a complex, contentious issue, especially in the Western United States.
+There exists no way to punish defectors, which can be done in the real world to
+maintain cooperation [@Nowak2006]. See the Exercises below for a review of some details we left out and a guide to exploring alternative assumptions on your 
+own.
 
-- Cultural evolution in agriculture (Waring work) and how cooperatives form
-  [@Waring2017]. Social behavior science-inspired field work for ecosystem 
-  protection @Bujold2020. 
 
-- (broader implications) This indicates we should be focusing groundwater recharge on the areas with the most amenable geological qualities for replenishing the groundwater aquifers (Stanford Doerr news brief summarizing Rosemary Knight's research, ["Scientists map fastest pathways for replenishing Central Valley groundwater"](https://sustainability.stanford.edu/news/scientists-map-fastest-pathways-replenishing-central-valley-groundwater))
-
+This work demonstrates how our understanding of cultural evolution can be
+harnessed to promote self-replicating in ecosystem protection 
+and sustainable agriculture to harness to promote self-replicating
+cooperatives form [@Bujold2020;@Waring2017]. 
+This could help promote smart water planning including, for example, groundwater
+recharge programs where resources get focused on areas that analyses like ours
+suggest are most amenable (see for example Stanford Doerr news brief summarizing
+Rosemary Knight's research, ["Scientists map fastest pathways for replenishing
+Central Valley
+groundwater"](https://sustainability.stanford.edu/news/scientists-map-fastest-pathways-replenishing-central-valley-groundwater)).
 When space structures interactions, large cooperatives can emerge starting from
 a few pioneer cooperators. The emergence of cooperatives requires that
 (1) cooperation be cheap, and (2) cooperators remain in cooperatives
 sufficiently for a sufficiently long time. Our 
 idealized model of space, social interaction, and migration rigorously
-proved these theoretical claims to be correct. This modeling approach
+proved these theoretical claims to be correct. 
+
+This modeling approach
 serves as a template for future work with more serious applications. See the
 [Exercises](#sec-exercises) for some ideas on how to extend the model to include ecological
 disaster penalties when two cooperators interact, and how to represent
 different size grids with loose connections, creating a sort of small-world
 network using rewiring.
+
+<!--
+In closing, this work suggests we should be focusing groundwater recharge on the areas with the most amenable geological qualities for replenishing the groundwater aquifers (Stanford Doerr news brief summarizing Rosemary Knight's research, ["Scientists map fastest pathways for replenishing Central Valley groundwater"](https://sustainability.stanford.edu/news/scientists-map-fastest-pathways-replenishing-central-valley-groundwater))
+-->
+
 
 ## Acknowledgements
 
